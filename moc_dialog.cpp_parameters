@@ -1,0 +1,12 @@
+-I/usr/include
+-I/usr/local/include
+-I/home/amir/Documents/CS Masters/Robotics/Final Project
+-I/usr/local/include
+-I/usr/local/include
+-I/usr/include
+-DCGAL_USE_MPFR
+-DCGAL_USE_GMP
+-DQT_NO_KEYWORDS
+-o
+/home/amir/Documents/CS Masters/Robotics/Final Project/moc_dialog.cpp
+/home/amir/Documents/CS Masters/Robotics/Final Project/dialog.h

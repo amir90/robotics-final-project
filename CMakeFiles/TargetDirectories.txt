@@ -1,0 +1,3 @@
+/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/edit_cache.dir
+/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/rebuild_cache.dir
+/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir
