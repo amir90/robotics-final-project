@@ -18,8 +18,8 @@
 #include "MyQueryHandler.h"
 #include "CGAL_defines.h"
 
-#define NumOfBridgeTests 5000
-#define STEPS 128
+#define NumOfBridgeTests 1500
+#define STEPS 256
 
 typedef typename std::vector<double> vec;
 using namespace std;
@@ -97,10 +97,7 @@ struct tree {
 
     Node *root;
     bool contains_qs;
-    Node  *qs;
     bool contains_qg;
-    Node *qg;
-    int index;
     list<Node*> nplist;
     int ni =0;
 	double zi = 0;
@@ -420,7 +417,7 @@ std::vector<tree> TreeBuild (Configuration qs,std::vector<Configuration> nplist,
 
     ts.root = ns;
 
-    ts.contains_qs=true; ts.contains_qg=false; ts.index=0; ts.qg = ns;
+    ts.contains_qs=true; ts.contains_qg=false;
 
     tree tg;
 
@@ -432,13 +429,13 @@ std::vector<tree> TreeBuild (Configuration qs,std::vector<Configuration> nplist,
 
     tg.root = ng;
 
-    tg.contains_qg = true; tg.contains_qs=false; tg.index=1; tg.qg = ng;
-
-    tree tempTree;
+    tg.contains_qg = true; tg.contains_qs=false;
 
     trilist[0]= ts; trilist[1] = tg;
 
     for (int i=2; i<numTrees; i++) {
+
+        tree tempTree;
 
         Node *temp = new Node();
 
@@ -448,11 +445,16 @@ std::vector<tree> TreeBuild (Configuration qs,std::vector<Configuration> nplist,
 
         tempTree.root = temp;
 
-        tempTree.contains_qs=false; tempTree.contains_qg=false; ts.index=i; ts.qg = temp;
+        tempTree.contains_qs=false; tempTree.contains_qg=false;
 
         trilist[i] = tempTree;
 
     }
+
+    //TODO: problem is here!
+ //   for (auto j: trilist) {
+    //	cout <<"tree size: "<<j.nplist.size()<<endl;
+   // }
 
     return trilist;
 
@@ -476,13 +478,13 @@ int PickTree(int numOfTrees) {
 
     int randNum = rand() % 100+1;
 
-    if (randNum>epsilon) {
+    if (randNum<=epsilon) {
 
         return -1;
 
     }
 
-        return (rand() % numOfTrees+1);
+        return (rand() % numOfTrees);
 }
 
 pair<int,Node*> Connect (tree &t, Configuration q, int steps, MyQueryHandler& queryHandler, Node *qs=NULL) {
@@ -547,29 +549,19 @@ pair<int,Node*> Connect (tree &t, Configuration q, int steps, MyQueryHandler& qu
 
              bool CWValid = (LocalPlanner(testConfCW,q,queryHandler)!=2);
 
-             cout<<"got here - partial connect"<<endl;
-
              if (!CCWValid && !CWValid) {continue;}
 
              Configuration minDistConf;
 
-             cout<<"got here - partial connect0"<<endl;
-
              if (CCWValid && !CWValid) {
-
-                 cout<<"got here - partial connect1"<<endl;
 
                  minDistConf = testConfCCW;
 
              } else if (!CCWValid && CWValid) {
 
-            	 cout<<"got here - partial connect2"<<endl;
-
                  minDistConf = testConfCW;
 
              } else if (CWValid && CCWValid) {
-
-            	 cout<<"got here - partial connect3"<<endl;
 
                  double distCW = dist (testConfCW,q);
                  double distCCW = dist(testConfCCW,q);
@@ -577,11 +569,8 @@ pair<int,Node*> Connect (tree &t, Configuration q, int steps, MyQueryHandler& qu
 
              }
 
-             cout<<"on step: "<<i<<endl;
-
                 Node*  qnew= new Node();
-                qnew->conf.xy = minDistConf.xy;
-                qnew->conf.theta = minDistConf.theta;
+                qnew->conf = minDistConf;
                 NN->nextList.push_back(qnew);
                 qnew->nextList.push_back(NN);
                 return pair<int,Node*>(1,qnew);
@@ -591,7 +580,6 @@ pair<int,Node*> Connect (tree &t, Configuration q, int steps, MyQueryHandler& qu
  //       	cout<<"got here - no connect!"<<endl;
         return pair<int,Node*>(0,NULL);
     }
-
 }
 
 int Reward(int state) {
@@ -606,30 +594,27 @@ int Reward(int state) {
 
 }
 
-std::pair<int,Node*> NN (std::vector<tree> Tree, Configuration q) {
+std::pair<int,Node*> NN (std::vector<tree>& TreeList, int pickTreeIndex, Configuration q) {
 
     //return Node and tree index
-
-    int treeCounter = 0;
     int NNtreeIndex = 0;
-    double minDist = dist(Tree[0].root->conf,q);
-    Node* NN = Tree[0].root;
+    int counter = 0;
+    double minDist = dist(TreeList[0].root->conf,q);
+    Node* NN = TreeList[0].root;
 
-    for (auto t:Tree) {
-        for (auto i:t.nplist) {
+    for (auto t:TreeList) {
+    	if (counter == pickTreeIndex) {++counter; continue;}
+ //   	cout<<"counter: "<<counter<<endl;
+    	for (auto i:t.nplist) {
             double currDist = dist(i->conf,q);
             if (minDist>currDist) {
                 minDist = currDist;
                 NN = i;
-                NNtreeIndex = treeCounter;
+                NNtreeIndex = counter;
             }
-
         }
 
-        ++treeCounter;
-
-
-
+        ++counter;
     }
 
     return std::pair<int,Node*>(NNtreeIndex,NN);
@@ -637,7 +622,7 @@ std::pair<int,Node*> NN (std::vector<tree> Tree, Configuration q) {
 
 }
 
-void Merge(tree& t1, tree& t2, Node* qnew, Node* qnear) {
+void Merge(std::vector<tree>& treeList, int firstIndex, int secondIndex, Node* qnew, Node* qnear) {
 
     //qnew is in t1. qnear is in t2
     //tree t2 is merged in to tree t1 - assumption: t2.index>t1.index
@@ -645,7 +630,7 @@ void Merge(tree& t1, tree& t2, Node* qnew, Node* qnear) {
     qnew->nextList.push_back(qnear);
     qnear->nextList.push_back(qnew);
 
-    t1.nplist.insert(t1.nplist.end(),t2.nplist.begin(),t2.nplist.end());
+    treeList[firstIndex].nplist.insert(treeList[firstIndex].nplist.end(),treeList[secondIndex].nplist.begin(),treeList[secondIndex].nplist.end());
 
     }
 
@@ -673,7 +658,6 @@ int main(int argc, char **argv) {
 	 		stream>>numOfObstacles;
 	 	}
 
-	 	cout<<numOfObstacles<<endl;
 	 	boost::char_separator<char> sep(" ");
 
 	    Polygon_set_2 tempPolygonSet;
@@ -755,26 +739,23 @@ int main(int argc, char **argv) {
 	    Configuration qs;
 	    Configuration qg;
 
-	    qs.xy= Point_2 (1,1);
-	    qs.theta = 0;
+	    qs.xy= Point_2 (50,65);
+	    qs.theta = 0.9;
 
-	    qg.xy = Point_2(2,2);
-	    qs.theta = 0;
+	    qg.xy = Point_2(40,20);
+	    qs.theta = 1.5;
 
 	    std::vector<tree> trlist = TreeBuild(qs,npList,qg);
 
 	   // cout<<"tree list size: "<<trlist.size()<<endl;
 
-	    std::vector<double> ni(trlist.size()); //number of times a tree has been played
-	    std::vector<double> zi(trlist.size()); //cumulative reward for each tree
-	    std::vector<double> score(trlist.size());
 	    double steps=4;
 	    int numOfTrees =trlist.size();
 	    bool startFlag = true;
 	    int pickTreeIndex;
 		int bestTreeIndex;
 
-	    for (int t=1; t<500; t++) {
+	    for (int t=1; t<580; t++) {
 
 	    	if (startFlag) {
 	    	int counter=0;
@@ -810,25 +791,55 @@ int main(int argc, char **argv) {
      //   std::cout<<"picked tree: "<<pickTreeIndex<<endl;
         //Tc = trlist[pickTreeIndex];
         trlist[pickTreeIndex].ni +=1;
-        std::cout<<pickTreeIndex<<" "<<endl;
+   //     std::cout<<pickTreeIndex<<" "<<endl;
         auto qrand = getRandomConfiguration(Bbox.xmax(),Bbox.xmin(),Bbox.ymax(),Bbox.ymin());
         //try to connect qrand to Tc. get state and node added (if added)
         auto statePair = Connect(trlist[pickTreeIndex],qrand,steps,queryHandler);
 
         if (statePair.first!=0) {
-
-    	    scene.addLine(QLineF(statePair.second->nextList.front()->conf.xy.x().to_double(),statePair.second->nextList.front()->conf.xy.y().to_double()*(-1),qrand.xy.x().to_double(), qrand.xy.y().to_double()*(-1)));
-
+    //    	cout<<"added node to tree: "<<pickTreeIndex<<endl;
+     //   	cout<<"new node assert : "<<statePair.second->nextList.size()<<endl;
+    	    scene.addLine(QLineF(statePair.second->nextList.front()->conf.xy.x().to_double(),statePair.second->nextList.front()->conf.xy.y().to_double()*(-1),statePair.second->conf.xy.x().to_double(), statePair.second->conf.xy.y().to_double()*(-1)));
+    	    //TODO: assert that all points are outside of obstacles
+    	       cout<<statePair.second->nextList.front()->conf.xy.x().to_double()<<","<<statePair.second->nextList.front()->conf.xy.y().to_double()<<"  "<<statePair.second->conf.xy.x().to_double()<<","<<statePair.second->conf.xy.y().to_double()<<endl;
         }
+
+ //       std::cout<<"got here"<<endl;
 
         int rew = Reward(statePair.first);
         trlist[pickTreeIndex].zi += rew;
 
+        if (statePair.first!=0) { //some node found
+        trlist[pickTreeIndex].nplist.push_back(statePair.second);
+	    //find nearest neighbour to qnew, not in Tc, and try to connect it. if succeeded, then merge the trees on that node.
+        auto NNPair = NN(trlist, pickTreeIndex,statePair.second->conf);
+      //  cout<<"NNPair tree: "<<NNPair.first<<endl;
+     //   cout<<"NNPair tree #nodes: "<<trlist[NNPair.first].nplist.size()<<endl;
+    //    for (auto r: trlist[NNPair.first].nplist) {
+     //   	cout<<r->conf.xy.x().to_double()<<","<<r->conf.xy.y().to_double()<<endl;
+  //      }
+        //attempt to connect the NN node's tree to the picked tree (use local planner)
+        if (LocalPlanner (NNPair.second->conf, statePair.second->conf, queryHandler)!=2) {
+
+   //     	cout<<statePair.second->nextList.size()<<endl;
+
+        	Merge(trlist,pickTreeIndex,NNPair.first,statePair.second,NNPair.second);
+        	 trlist.erase(trlist.begin()+NNPair.first);
+        	 numOfTrees = trlist.size();
+        	 if (numOfTrees==1) {
+        		 break;
+        	 }
+
+     //   	 cout<<statePair.second->nextList.size()<<endl;
+    //   	    cout<<"edge points which is connected from nearest tree"<<endl;
+    //   	    cout<< statePair.second->conf.xy.x().to_double()<<","<<statePair.second->conf.xy.y().to_double()*(-1)<<"  "<<NNPair.second->conf.xy.x().to_double()<<","<<NNPair.second->conf.xy.y().to_double()*(-1)<<endl;
+    	    scene.addLine(QLineF(statePair.second->conf.xy.x().to_double(),statePair.second->conf.xy.y().to_double()*(-1),NNPair.second->conf.xy.x().to_double(), NNPair.second->conf.xy.y().to_double()*(-1)));
+        }
+
+	    }
 	    }
 
-	    //find nearest neighbour to qnew, not in Tc, and try to connect it. if succeeded, then merge the trees on that node.
-
-
+	    cout<<"num of remaining trees: "<<numOfTrees<<endl;
 
 	    double rad = 1;
 	    for (auto i=npList.begin(); i!=npList.end(); i++) {
