@@ -7,6 +7,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/min.dir/mainwindow.cpp.o"
   "CMakeFiles/min.dir/dialog.cpp.o"
   "CMakeFiles/min.dir/MyQueryHandler.cpp.o"
+  "CMakeFiles/min.dir/Path.cpp.o"
   "CMakeFiles/min.dir/moc_mainwindow.cpp.o"
   "CMakeFiles/min.dir/moc_dialog.cpp.o"
   "min.pdb"

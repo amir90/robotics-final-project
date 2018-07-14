@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/amir/Documents/CS Masters/Robotics/Final Project/MyQueryHandler.cpp" "/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir/MyQueryHandler.cpp.o"
+  "/home/amir/Documents/CS Masters/Robotics/Final Project/Path.cpp" "/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir/Path.cpp.o"
   "/home/amir/Documents/CS Masters/Robotics/Final Project/dialog.cpp" "/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir/dialog.cpp.o"
   "/home/amir/Documents/CS Masters/Robotics/Final Project/main.cpp" "/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir/main.cpp.o"
   "/home/amir/Documents/CS Masters/Robotics/Final Project/mainwindow.cpp" "/home/amir/Documents/CS Masters/Robotics/Final Project/CMakeFiles/min.dir/mainwindow.cpp.o"

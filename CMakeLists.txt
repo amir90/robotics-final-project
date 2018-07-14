@@ -30,7 +30,7 @@ qt5_wrap_ui(arrangement_2_uis mainwindow.ui dialog.ui)
 
 qt5_wrap_cpp( CGAL_Qt5_MOC_FILES mainwindow.h dialog.h)
 
-  add_executable  ( min main.cpp CGAL_defines.h mainwindow.cpp dialog.cpp MyQueryHandler.cpp  IQueryHandler.h MyQueryHandler.h ${CGAL_Qt5_RESOURCE_FILES}${arrangement_2_uis} ${CGAL_Qt5_MOC_FILES})
+  add_executable  ( min main.cpp CGAL_defines.h mainwindow.cpp dialog.cpp MyQueryHandler.cpp  IQueryHandler.h MyQueryHandler.h Path.cpp Path.h ${CGAL_Qt5_RESOURCE_FILES}${arrangement_2_uis} ${CGAL_Qt5_MOC_FILES})
 
   qt5_use_modules(min Xml Script OpenGL Svg Widgets)
 

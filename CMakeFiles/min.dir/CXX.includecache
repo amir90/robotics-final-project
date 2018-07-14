@@ -56,6 +56,18 @@ MyQueryHandler.h
 IQueryHandler.h
 /home/amir/Documents/CS Masters/Robotics/Final Project/IQueryHandler.h
 
+/home/amir/Documents/CS Masters/Robotics/Final Project/Path.cpp
+Path.h
+/home/amir/Documents/CS Masters/Robotics/Final Project/Path.h
+
+/home/amir/Documents/CS Masters/Robotics/Final Project/Path.h
+CGAL_defines.h
+/home/amir/Documents/CS Masters/Robotics/Final Project/CGAL_defines.h
+vector
+-
+utility
+-
+
 /home/amir/Documents/CS Masters/Robotics/Final Project/dialog.cpp
 dialog.h
 /home/amir/Documents/CS Masters/Robotics/Final Project/dialog.h
@@ -103,6 +115,8 @@ MyQueryHandler.h
 /home/amir/Documents/CS Masters/Robotics/Final Project/MyQueryHandler.h
 CGAL_defines.h
 /home/amir/Documents/CS Masters/Robotics/Final Project/CGAL_defines.h
+Path.h
+/home/amir/Documents/CS Masters/Robotics/Final Project/Path.h
 
 /home/amir/Documents/CS Masters/Robotics/Final Project/mainwindow.cpp
 mainwindow.h
